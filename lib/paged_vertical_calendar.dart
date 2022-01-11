@@ -26,6 +26,7 @@ class PagedVerticalCalendar extends StatefulWidget {
   PagedVerticalCalendar({
     this.startDate,
     this.endDate,
+    this.initialDate,
     this.monthBuilder,
     this.dayBuilder,
     this.addAutomaticKeepAlives = false,
@@ -45,6 +46,9 @@ class PagedVerticalCalendar extends StatefulWidget {
   /// optional [DateTime] to end the calendar pagination, of no [endDate] is
   /// provided the calendar can paginate indefinitely
   final DateTime? endDate;
+
+  /// optional [DateTime] to display which date should appear on screen
+  final DateTime? initialDate;
 
   /// a Builder used for month header generation. a default [MonthBuilder] is
   /// used when no custom [MonthBuilder] is provided.
@@ -96,8 +100,17 @@ class _PagedVerticalCalendarState extends State<PagedVerticalCalendar> {
   @override
   void initState() {
     super.initState();
+    int firstPageKey = 0;
+    if (widget.startDate != null &&
+        widget.initialDate != null &&
+        widget.startDate!.isBefore(widget.initialDate!)) {
+      int years = widget.initialDate!.year - widget.startDate!.year;
+      firstPageKey =
+          (widget.initialDate!.month - widget.startDate!.month) + 12 * years;
+    }
+
     controller = PagingController<int, Month>(
-      firstPageKey: 0,
+      firstPageKey: firstPageKey,
       invisibleItemsThreshold: widget.invisibleMonthsThreshold,
     );
     controller.addPageRequestListener(fetchItems);
